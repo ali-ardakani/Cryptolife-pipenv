@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{%  endblock title %}
+
+{% block content %}
+<br />
+<div class="jumbotron">
+    <h1 class='display-4'>Cryptocurrency Prices</h1>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{% url 'prices_list' %}" role="button">View All Prices</a>
+    </p>
+</div>
+<br />
+<div class="jumbotron">
+    <h1 class='display-4'>Cryptocurrency News</h1>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="{% url 'news_list' %}" role="button">View All News</a>
+    </p>
+</div>
+<br />
+<div class="jumbotron">
+    <h1 class='display-4'>Cryptocurrency Ideas</h1>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="" role="button">View All Ideas</a>
+    </p>
+</div>
+{% endblock content %}

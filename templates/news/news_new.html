@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}New news{% endblock title %}
+
+{% block content %}
+    <h1>Add a news</h1>
+    <br/>
+    <div class="form-group">
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.media }}
+            {{ form.as_p }}
+            <button class="btn btn-success ml-2" type="submit">Save</button>
+        </form>
+    </div>
+{% endblock content %}

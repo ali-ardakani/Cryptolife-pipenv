@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+environs = "*"
+django-ckeditor = "*"
+dj-database-url = "*"
+whitenoise = "*"
+django-crispy-forms = "*"
+beautifulsoup4 = "*"
+requests = "*"
+pillow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

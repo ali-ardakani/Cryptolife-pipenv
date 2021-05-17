@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object.title }}{% endblock title %}
+
+{% block content %}
+    <div class="news-entry">
+        <h2>{{ object.title }}</h2>
+        <p class="font-weight-bold">by {{ object.author }}  <span class="text-muted font-weight-normal">{{ object.date }}</span>
+            {% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %}
+            <a href="{% url 'news_edit' news.pk %}">Edit</a> |
+            <a href="{% url 'news_delete' news.pk %}">Delete</a>
+        {% endif %}
+        </p>
+        <hr>
+        {% if object.header_image %}<br/>    
+            <a href="{{ object.header_image.url }}"><img style="display: block; margin-left: auto; margin-right: auto; width: 100%;" src="{{ object.header_image.url }}" ></a><br/><br/>
+        {% endif %}
+        {{ object.body|safe|linebreaksbr }}
+    </div>
+    <br/>
+    <p>
+        {% if user.is_authenticated %}
+            <div style='display:flex;'>
+                <form action="{% url 'like_news' news.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn btn-primary btn-sm">Like {{ total_likes }}</button>
+                </form>
+
+                <form action="{% url 'unlike_news' news.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn btn-danger btn-sm">Unlike {{ total_unlikes }}</button> 
+                </form>
+            </div>
+        {% else %}
+        <small>
+            {{ total_likes }} Likes & {{ total_unlikes }} Unlike | 
+           <a href="{% url 'login' %}" class="">Log in</a> to like</small>
+        {% endif %}
+            <hr>
+        </p>
+
+        <br/>
+    <div class="col-md-8 card mb-4 mt-3">
+        {% if user.is_authenticated %}
+        <a href='{% url "comment_new" pk_news=news.pk %}'>Add comment ...</a>
+        {% else %}
+        <p><a href="{% url 'login' %}" class="">Log in</a> to add comment</p>
+        {% endif %}
+        <div class="card-body">
+            <h2>{{ object.comments.count }} comments</h2>
+            <hr>
+            {% for comment in object.comments.all %}
+            <div class="comments" style="padding: 10;">
+                <p class="font-weight-bold">
+                    {{ comment.author }}
+                    <span class="text-muted font-weight-normal">
+                        {{ comment.created_on }}
+                    </span>
+                    {% if user == news.author or user == comment.author or perms.news.all or perms.news.change_news or perms.news.delete_news %} 
+                        <a href="{% url 'comment_edit'  pk_news=news.pk pk=comment.pk %}">Edit</a> |
+                        <a href="{% url 'comment_delete'  pk_news=news.pk pk=comment.pk %}">Delete</a>
+                    {% endif %} 
+                </p>
+                {{ comment.comment|safe|linebreaks }}
+                {% if user.is_authenticated %}
+                <div style='display:flex;'>
+                    <form action="{% url 'like_comment' news.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn btn-primary btn-sm">Like {{ comment.total_likes_comment }}</button>
+                    </form>
+
+                    <form action="{% url 'unlike_comment' news.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn btn-danger btn-sm">Unlike {{ comment.total_unlikes_comment }}</button> 
+                    </form>
+                </div>
+                {% else %}
+                <small>
+                    {{ comment.total_likes_comment }} Likes & {{ comment.total_unlikes_comment }} Unlike | 
+                    <a href="{% url 'login' %}" class="">Log in</a> to like</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+{% endblock content %}
