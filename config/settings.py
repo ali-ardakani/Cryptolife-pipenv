@@ -46,9 +46,9 @@ INSTALLED_APPS = [
     'accounts',
     'pages',
     'news',
-    'price',
     'ckeditor',
     'ckeditor_uploader',
+    'easy_select2',
 ]
 
 CKEDITOR_UPLOAD_PATH = "news/uploads/"

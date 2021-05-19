@@ -6,11 +6,12 @@ from .models import News, Comment
 class NewsForm(forms.ModelForm):
     class Meta:
         model = News
-        fields = ('title', 'header_image', 'body')
+        fields = ('title', 'header_image', 'body', 'category')
 
         widgets = {
             'title' : forms.TextInput(attrs={'class':'form-control'}),
             'body' : forms.Textarea(attrs={'class':'form-control'}),
+            'category' : forms.SelectMultiple(attrs={'class':'form-control'}),
 
         }
 

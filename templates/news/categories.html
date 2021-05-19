@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{slug}}{% endblock title %}
+
+{% block content %}
+    <h1>{{ slug }}</h1>
+    {% for news in category_news %}
+        <div class="card">
+            <div class="card-header">
+                <span class="font-weight-bold"><a href="{% url 'news_detail' news.pk %}" style="color:#1d1414;">{{ news.title }}</a></span> &middot;
+                <span class="text-muted">by {{ news.author }} | {{ news.date }}</span>
+            </div>
+            <div class="card-body">
+                {{ news.body|safe|truncatewords:"100" }}
+            </div>
+            {% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %}
+                <div class="card-footer text-center text-muted">
+                        <a href="{% url 'news_edit' news.pk %}">Edit</a> | 
+                        <a href="{% url 'news_delete' news.pk %}">Delete</a>
+                    </div>
+            {% endif %}
+        </div>
+        <br />
+    {% endfor %}
+
+{% endblock content %}

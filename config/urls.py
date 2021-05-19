@@ -17,13 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from news.views import prices_list, price_detail
 
 urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('prices/',include('price.urls')),
+    path('prices/', prices_list, name='prices_list'),
+    path('price/<slug:slug>/', price_detail, name='price_detail'),
     path('news/', include('news.urls')),
     path('', include('pages.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -6,7 +6,13 @@ from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
-from .models import Comment, News
+from bs4 import BeautifulSoup
+import re
+import json
+import requests
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from .models import Comment, News, Category
 from .forms import NewsForm, CommentForm
 
 
@@ -79,6 +85,13 @@ class NewsListView(ListView):
     model = News
     template_name = 'news/news_list.html'
 
+
+def CategoryView(request, slug):
+    try:
+        category_news = News.objects.filter(category=Category.objects.get(slug=slug.replace('-', ' ')))
+        return render(request, 'news/categories.html', {'slug':slug.title().replace('-', ' '), 'category_news':category_news})
+    except:
+        return render(request, '404.html')
 class NewsDetailView(DetailView):
     model = News
     template_name = 'news/news_detail.html'
@@ -194,6 +207,13 @@ class NewsCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+class CategoryCreatingView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Category
+    template_name = 'news/category_new.html'
+    permission_required = 'news.add_news'
+    fields = '__all__'
+
+
 class NewsCommentsCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     template_name = 'news/comment_news_new.html'
@@ -210,5 +230,50 @@ class NewsCommentsCreateView(LoginRequiredMixin, CreateView):
 def error_404(request, exception):
         data = {}
         return render(request,'404.html', data)
+
+
+def prices_list(request):
+
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+    parameters = {
+    'start':'1',
+    'limit':'5000',
+    'convert':'USD'
+    }
+
+    headers = {
+    'Accepts': 'application/json',
+    'X-CMC_PRO_API_KEY': 'c1f53ff1-4bdc-4db1-993e-1e7e5994a29c',
+    }
+
+    session = Session()
+    session.headers.update(headers)
+
+    try:
+        response = session.get(url, params=parameters)
+        data = json.loads(response.text)
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print(e)
+
+    data = data['data']
+    name_list = []
+    for coin in data:
+        name_list.append(coin['name'])
+
+    zip_data = zip(name_list, data)
+    dict_data = dict(zip_data)
+
+
+    return render(request, 'price/prices_list.html', {'dict_data' : dict_data})
+
+
+def price_detail(requset, slug):
+    website = requests.get('https://coinmarketcap.com/currencies/%s/' % slug)
+    soup = BeautifulSoup(website.text, 'html.parser')
+    price_usd = soup.find('div', {"class":"priceValue___11gHJ"})
+    price_usd = price_usd.text
+    market_cap = soup.find('div', {"class":"statsValue___2iaoZ"})
+    market_cap = market_cap.text
+    return render(requset, 'price/price_detail.html', {'price_usd' : price_usd, 'market_cap' : market_cap})
 
 

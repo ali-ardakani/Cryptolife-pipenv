@@ -6,6 +6,15 @@ from django.urls import  reverse
 from ckeditor.fields import  RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 
+
+class Category(models.Model):
+    slug = models.CharField(max_length=300)
+    def __str__(self):
+        return self.slug
+
+    def get_absolute_url(self):
+        return reverse("news_new")
+
 class News(models.Model):
 
     class Meta:
@@ -22,6 +31,7 @@ class News(models.Model):
         get_user_model(),
         on_delete=models.CASCADE,
     )
+    category = models.ManyToManyField(Category, default='cryptocurrency', related_name='category')
     like_news = models.ManyToManyField(AUTH_USER_MODEL, blank=True, related_name='the_news')
     unlike_news = models.ManyToManyField(AUTH_USER_MODEL, blank=True, related_name='the_news_unlike')
 

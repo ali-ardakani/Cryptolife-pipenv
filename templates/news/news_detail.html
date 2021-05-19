@@ -10,15 +10,6 @@
             <a href="{% url 'news_edit' news.pk %}">Edit</a> |
             <a href="{% url 'news_delete' news.pk %}">Delete</a>
         {% endif %}
-        </p>
-        <hr>
-        {% if object.header_image %}<br/>    
-            <a href="{{ object.header_image.url }}"><img style="display: block; margin-left: auto; margin-right: auto; width: 100%;" src="{{ object.header_image.url }}" ></a><br/><br/>
-        {% endif %}
-        {{ object.body|safe|linebreaksbr }}
-    </div>
-    <br/>
-    <p>
         {% if user.is_authenticated %}
             <div style='display:flex;'>
                 <form action="{% url 'like_news' news.pk %}" method="POST">
@@ -36,8 +27,21 @@
             {{ total_likes }} Likes & {{ total_unlikes }} Unlike | 
            <a href="{% url 'login' %}" class="">Log in</a> to like</small>
         {% endif %}
-            <hr>
         </p>
+        <hr>
+        {% if object.header_image %}<br/>    
+            <a href="{{ object.header_image.url }}"><img style="display: block; margin-left: auto; margin-right: auto; width: 100%;" src="{{ object.header_image.url }}" ></a><br/><br/>
+        {% endif %}
+        {{ object.body|safe|linebreaksbr }}
+    </div>
+    <br/>
+    <p>
+        {% for category in object.category.all %}
+        <a href="{% url 'category' slug=category|slugify %}"><button type="button" class="btn btn-secondary">{{ category }}</button></a>
+        {% endfor %}
+        </p>
+        <br/>
+        <hr>
 
         <br/>
     <div class="col-md-8 card mb-4 mt-3">
