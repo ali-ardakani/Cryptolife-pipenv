@@ -92,6 +92,7 @@ def CategoryView(request, slug):
         return render(request, 'news/categories.html', {'slug':slug.title().replace('-', ' '), 'category_news':category_news})
     except:
         return render(request, '404.html')
+        
 class NewsDetailView(DetailView):
     model = News
     template_name = 'news/news_detail.html'

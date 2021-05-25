@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Forbidden
+{% endblock title %}
+
+{% block content %}
+<h1>This account is not found.</h1>
+<ul>
+    <li>
+        Go back to <a href="{% url 'home' %}">Home</a>.
+    </li>
+</ul>
+{% endblock content %}

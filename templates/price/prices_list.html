@@ -38,27 +38,21 @@
           </li>
         </ul>
       </div>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
         {% if user.is_authenticated %}
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{ user.username }}
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="{% url 'password_change'%}">Change password</a>
-                <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
-              </div>
-            </li>
-          </ul>
-          {% else %}
-            <form class="form-inline ml-auto">
-              <a href="{% url 'login' %}" class="btn btn-outline-secondary">Log In</a>
-              <a href="{% url 'signup' %}" class="btn btn-primary ml-2">Sign up</a>
-            </form>
+        <div class = "btn-group dropleft">
+          <img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{ user.profile_image.url }}" alt="logo" width="40" height="40">
+          <div class="dropdown-menu" aria-labelledby="id_profile_links">
+            <li class="dropdown-item">{{ user.username }}</li>
+            <a class="dropdown-item" href="{% url 'accounts:user_view' user.id%}">Account</a>
+            <a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a>
+          </div>
+        </div>
+        {% else %}
+          <form class="form-inline ml-auto">
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary">Log In</a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-primary ml-2">Sign up</a>
+          </form>
           {% endif %}
-      </div>
     </nav>
     <main>
       <div class='tableWrapper___3utdq cmc-table-homepage-wrapper___22rL4'>

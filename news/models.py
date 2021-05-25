@@ -58,7 +58,7 @@ class Comment(models.Model):
         get_user_model(),
         on_delete=models.CASCADE,
     )
-    comment = RichTextField()
+    comment = RichTextUploadingField()
     created_on = models.DateTimeField(auto_now_add=True)
 
     like_comment = models.ManyToManyField(AUTH_USER_MODEL, blank=True, related_name='comment_like')
