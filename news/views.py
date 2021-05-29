@@ -1,17 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import ListView, DetailView
-from django.contrib.auth.decorators import permission_required
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
-from bs4 import BeautifulSoup
+from django.core import serializers
 import re
-import json
+from accounts.models import CustomUser
 import requests
-from requests import Request, Session
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from GoogleNews import GoogleNews
 from .models import Comment, News, Category
 from .forms import NewsForm, CommentForm
 
@@ -84,6 +82,32 @@ def CommentUnLikeView(request, pk):
 class NewsListView(ListView):
     model = News
     template_name = 'news/news_list.html'
+    def get_context_data(self, *args, **kwargs):
+        context = super(NewsListView, self).get_context_data(**kwargs)
+        def google_news(name):
+            googlenews = GoogleNews()
+            googlenews = GoogleNews(lang='en')
+            googlenews = GoogleNews(period='1d')
+            googlenews.get_news(name)
+            googlenews = googlenews.results()[0:5]
+            news_obj = News.objects.all().values()
+            for news in news_obj:
+                news_dict = {}
+                news_dict['title'] = news['title']
+                news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
+                news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
+                news_dict['title'] = news['body']
+
+                googlenews.append(news_dict)
+
+            googlenews = sorted(googlenews, key = lambda i: i['datetime'], reverse=True)
+            return googlenews
+        
+        context['news_bitcoin'] = google_news('bitcoin')
+        context['news_cryptocurrency'] = google_news('cryptocurrency')
+
+        return context
+
 
 
 def CategoryView(request, slug):
@@ -233,48 +257,211 @@ def error_404(request, exception):
         return render(request,'404.html', data)
 
 
-def prices_list(request):
+# def prices_list(request):
 
-    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
-    parameters = {
-    'start':'1',
-    'limit':'5000',
-    'convert':'USD'
-    }
+#     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+#     parameters = {
+#     'start':'1',
+#     'limit':'5000',
+#     'convert':'USD'
+#     }
 
-    headers = {
-    'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': 'c1f53ff1-4bdc-4db1-993e-1e7e5994a29c',
-    }
+#     headers = {
+#     'Accepts': 'application/json',
+#     'X-CMC_PRO_API_KEY': 'c1f53ff1-4bdc-4db1-993e-1e7e5994a29c',
+#     }
 
-    session = Session()
-    session.headers.update(headers)
+#     session = Session()
+#     session.headers.update(headers)
 
-    try:
-        response = session.get(url, params=parameters)
-        data = json.loads(response.text)
-    except (ConnectionError, Timeout, TooManyRedirects) as e:
-        print(e)
+#     try:
+#         response = session.get(url, params=parameters)
+#         data = json.loads(response.text)
+#     except (ConnectionError, Timeout, TooManyRedirects) as e:
+#         print(e)
 
-    data = data['data']
-    name_list = []
+#     data = data['data']
+#     name_list = []
+#     for coin in data:
+#         name_list.append(coin['name'])
+
+#     zip_data = zip(name_list, data)
+#     dict_data = dict(zip_data)
+
+
+#     return render(request, 'price/prices_list.html', {'dict_data' : dict_data})
+
+
+# def prices_list(request):
+#     url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false"
+#     data = requests.get(url).json()
+#     context = {'data': data}
+
+#     return render(request, 'price/prices_list.html', context)
+
+
+
+def get_coins_markets(request, page, **kwargs):
+    """List all supported coins price, market cap, volume, and market related data"""
+    context = {}
+    url = 'https://api.coingecko.com/api/v3/'
+    kwargs['vs_currency'] = 'usd'
+
+    api_url = '{0}coins/markets'.format(url)
+    api_url = '{0}?vs_currency=usd&order=market_cap_desc&per_page=100&page={1}&sparkline=false'.format(api_url, page)
+
+    data = requests.get(api_url).json()
     for coin in data:
-        name_list.append(coin['name'])
+        coin['current_price'] = currency(coin['current_price'])
+        coin['market_cap'] = currency(coin['market_cap'])
+        coin['total_volume'] = currency(coin['total_volume'])
+        coin['circulating_supply'] = re.sub('\$', '', currency(coin['circulating_supply']))
+    context['data'] = data
+    context['page'] = page
 
-    zip_data = zip(name_list, data)
-    dict_data = dict(zip_data)
+    return render(request, 'price/prices_list.html', context)
 
 
-    return render(request, 'price/prices_list.html', {'dict_data' : dict_data})
+# def price_detail(requset, slug):
+#     website = requests.get('https://coinmarketcap.com/currencies/%s/' % slug)
+#     soup = BeautifulSoup(website.text, 'html.parser')
+#     price_usd = soup.find('div', {"class":"priceValue___11gHJ"})
+#     price_usd = price_usd.text
+#     market_cap = soup.find('div', {"class":"statsValue___2iaoZ"})
+#     market_cap = market_cap.text
+#     return render(requset, 'price/price_detail.html', {'price_usd' : price_usd, 'market_cap' : market_cap})
+
+def currency(volume):
+            if int(float(volume)) > 0 or int(float(volume)) < 0:
+                if int(float(volume)) > 10000 or int(float(volume)) < -10000:
+                    volume = float(volume)
+                    price = "%.2f" % volume
+                    profile = re.compile(r"(\d)(\d\d\d[.,])")
+                    while 1:
+                        price, count = re.subn(profile,r"\1,\2",price)
+                        if not count: 
+                            price = re.sub(r"\.\d*", '', price)
+                            price = '$' + price
+                            break
+                    return price
+                else:
+                    volume = float(volume)
+                    price = "%.2f" % volume
+                    profile = re.compile(r"(\d)(\d\d\d[.,])")
+                    while 1:
+                        price, count = re.subn(profile,r"\1,\2",price)
+                        if not count: 
+                            price = '$' + price
+                            break
+                    return price
+            
+            else:
+                volume = '$' + str(volume)
+                return volume
+
+def get_coin_by_id(request,id, **kwargs):
+        """Get current data (name, price, market, ... including exchange tickers) for a coin"""
+
+        context = {}
+
+        url = 'https://api.coingecko.com/api/v3/'
+        kwargs['vs_currency'] = 'usd'
+
+        api_url = '{0}coins/{1}/'.format(url, id)
+        
+        data = requests.get(api_url).json()
 
 
-def price_detail(requset, slug):
-    website = requests.get('https://coinmarketcap.com/currencies/%s/' % slug)
-    soup = BeautifulSoup(website.text, 'html.parser')
-    price_usd = soup.find('div', {"class":"priceValue___11gHJ"})
-    price_usd = price_usd.text
-    market_cap = soup.find('div', {"class":"statsValue___2iaoZ"})
-    market_cap = market_cap.text
-    return render(requset, 'price/price_detail.html', {'price_usd' : price_usd, 'market_cap' : market_cap})
+        data['Volume_Market_Cap'] = '%.5f' % (float(data['market_data']['total_volume']['usd']) / float(data['market_data']['market_cap']['usd']))
+        data['market_data']['current_price']['usd'] = currency(data['market_data']['current_price']['usd'])
+        # This variable is created for comparison in the template. 
+        data['market_data']['price_change_percentage_24h_if'] = float(data['market_data']['price_change_percentage_24h'])
+        data['market_data']['price_change_percentage_24h'] = '%.2f' % data['market_data']['price_change_percentage_24h']
+        data['market_data']['market_cap_change_percentage_24h_if'] = float(data['market_data']['market_cap_change_percentage_24h'])
+        data['market_data']['market_cap_change_percentage_24h'] = '%.2f' % data['market_data']['market_cap_change_percentage_24h']
+        data['market_data']['price_change_24h'] = currency(data['market_data']['price_change_24h'])
+        data['market_data']['low_24h']['usd'] = currency(data['market_data']['low_24h']['usd'])
+        data['market_data']['high_24h']['usd'] = currency(data['market_data']['high_24h']['usd'])
+        data['market_data']['total_volume']['usd'] = currency(data['market_data']['total_volume']['usd'])
+        data['market_data']['market_cap']['usd'] = currency(data['market_data']['market_cap']['usd'])
+        if data['market_data']['fully_diluted_valuation'] != {}:
+            data['market_data']['fully_diluted_valuation']['usd'] = currency(data['market_data']['fully_diluted_valuation']['usd'])
+        else:
+            data['market_data']['fully_diluted_valuation'] = False
+        data['market_data']['market_cap_change_24h'] = currency(data['market_data']['market_cap_change_24h'])
+        data['market_data']['circulating_supply'] = re.sub('\$', '', currency(data['market_data']['circulating_supply']))
+        if data['market_data']['total_supply'] != None:
+            data['market_data']['total_supply'] = re.sub('\$', '', currency(data['market_data']['total_supply']))
+        else:
+            data['market_data']['total_supply'] != False
+        if data['market_data']['max_supply'] != None:
+            data['market_data']['max_supply'] = re.sub('\$', '', currency(data['market_data']['max_supply']))
+        else:
+            data['market_data']['max_supply'] = False
+        
+
+        if data['links']['homepage'].count('') == 3:
+            data['links'].pop('homepage')
+            
+        if data['links']['blockchain_site'].count('') == 3:
+            data['links'].pop('blockchain_site')
+            
+        if data['links']['official_forum_url'].count('') == 3:
+            data['links'].pop('official_forum_url')
+            
+        if data['links']['chat_url'].count('') == 3:
+            data['links'].pop('chat_url')
+            
+        if data['links']['announcement_url'].count('') == 2:
+            data['links'].pop('announcement_url')
+
+
+
+        url_companies = "https://api.coingecko.com/api/v3/companies/public_treasury/bitcoin"
+
+        companies = requests.get(url_companies).json()
+
+        for company in companies['companies']:
+            company['total_holdings'] = re.sub('\$', '', currency(company['total_holdings']))
+            company['total_entry_value_usd'] = currency(company['total_entry_value_usd'])
+            company['total_current_value_usd'] = currency(company['total_current_value_usd'])
+
+        context['companies'] = companies            
+
+        context['data'] = data
+
+        return render(request, 'price/price_detail.html', context)
+
+
+# def google_news(request):
+
+#     context = {}
+#     name = request.POST.get('name_coin')
+#     googlenews = GoogleNews()
+#     googlenews = GoogleNews(lang='en')
+#     googlenews = GoogleNews(period='1d')
+#     googlenews.get_news(name)
+#     googlenews = googlenews.results()[0:5]
+    
+#     for news in googlenews:
+#         queryset = Google_News.objects.create(
+#             title = news['title'],
+#             site = news['site'],
+#             description = news['desc'],
+#             date_time = news['datetime'],
+#             image = news['img'],
+#         )
+#         queryset.category.set(Category.objects.filter(slug=name))
+#         queryset.save()
+
+#     return HttpResponseRedirect(reverse('news_list'))
+    
+
+
+
+
+    
+
+
 
 

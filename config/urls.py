@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from news.views import prices_list, price_detail
+from news.views import get_coins_markets, get_coin_by_id
 from django.contrib.auth.decorators import login_required
 from  django.views.decorators.cache  import never_cache
 from ckeditor_uploader import views
@@ -28,8 +28,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),
     path('accounts/', include(('django.contrib.auth.urls', 'accounts_conf'), namespace='accounts_conf')),
-    path('prices/', prices_list, name='prices_list'),
-    path('price/<slug:slug>/', price_detail, name='price_detail'),
+    path('prices/<int:page>/', get_coins_markets, name='prices_list'),
+    path('price/<slug:id>/', get_coin_by_id, name='price_detail'),
     path('news/', include('news.urls')),
     path('', include('pages.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

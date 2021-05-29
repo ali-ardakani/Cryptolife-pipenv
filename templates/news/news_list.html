@@ -3,6 +3,20 @@
 {% block title %}News{% endblock title %}
 
 {% block content %}
+
+    {% for news in news_cryptocurrency %}
+        <div class="card">
+            <div class="card-header">
+                <span class="font-weight-bold"><a href='https://{{news.link}}' style="color:#1d1414;">{{ news.title }}</a></span> &middot;
+                <span class="text-muted">by {{ news.site }} | {{ news.datetime }}</span>
+            </div>
+            <div class="card-body">
+                {{ news.desc|safe|truncatewords:"100" }}
+            </div>
+        </div>
+        <br />
+    {% endfor %}
+
     {% for news in news_list %}
         <div class="card">
             <div class="card-header">

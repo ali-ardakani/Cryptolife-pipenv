@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}News{% endblock title %}
+
+{% block content %}
+    {% for account in accounts_list %}
+            <p>ali</p>
+        <div class="card">
+            <div class="card-header">
+                <span class="font-weight-bold"><a href="{% url 'news_detail' news.pk %}" style="color:#1d1414;">{{ account.username }}</a></span> &middot;
+                <span class="text-muted">{{ account.date_joined }} | {{ account.last_login }}</span>
+            </div>
+            <div class="card-body">
+                {{ account.profile_image }}
+            </div>
+            <!-- {% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %}
+                <div class="card-footer text-center text-muted">
+                        <a href="{% url 'news_edit' news.pk %}">Edit</a> | 
+                        <a href="{% url 'news_delete' news.pk %}">Delete</a>
+                    </div>
+            {% endif %} -->
+        </div>
+        <br />
+    {% endfor %}
+{% endblock content %}

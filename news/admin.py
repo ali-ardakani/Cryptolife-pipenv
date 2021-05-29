@@ -12,9 +12,15 @@ class NewsAdmin(admin.ModelAdmin):
     ]
     form = select2_modelform(News, attrs={'width': '250px'})
 
+class CategoryAdmin(admin.ModelAdmin):
+    model = Category
+    list_display = ['slug',]
+    search_fields = ['slug',]
+
 
 
 
 admin.site.register(News, NewsAdmin)
 admin.site.register(Comment)
-admin.site.register(Category)
+admin.site.register(Category, CategoryAdmin)
+# admin.site.register(Google_News)

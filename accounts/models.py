@@ -5,6 +5,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.http import HttpResponseRedirect
 from django.urls import  reverse
 
+
 class MyAccountManager(BaseUserManager):
 
     def create_user(self, email, username, password=None):
@@ -58,11 +59,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = MyAccountManager()
 
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
     def __str__(self):
-        return self.USERNAME_FIELD
+        return self.username
 
     def get_profile_image_filename(self):
         return str(self.profile_image)[str(self.profile_image).index(f'images/accounts/profiles/{self.pk}/'):]

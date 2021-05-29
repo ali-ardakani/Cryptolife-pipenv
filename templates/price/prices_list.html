@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0", shrink-to-fit='no'>
     <title>{% block title %}Prices{% endblock title %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -16,7 +17,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="{% url 'prices_list' %}">Prices <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="{% url 'prices_list' page=1 %}">Prices <span class="sr-only">(current)</span></a>
           </li>
           {% if perms.news.add_news or perms.news.all %}
           <li class="nav-item dropdown active">
@@ -59,9 +60,8 @@
 
         <table class="table table-hover cmc-table cmc-table___11lFC cmc-table-homepage___2_guh table " style="margin: auto;">
             <colgroup>
-                <col style="width:50px;min-width:auto">
+                <col style="width:20px;min-width:auto">
                 <col style="width:200px;min-width:auto">
-                <col style="width:84px;min-width:auto">
                 <col style="width:84px;min-width:auto">
                 <col style="width:84px;min-width:auto">
                 <col style="width:200px;min-width:auto">
@@ -76,28 +76,41 @@
                 <th scope="col">Name</th>
                 <th scope="col">Price</th>
                 <th scope="col">24h%</th>
-                <th scope="col">7d%</th>
                 <th scope="col">Market Cap</th>
                 <th scope="col">Volume(24h)</th>
                 <th scope="col">Circulating Supply</th>
             </tr>
             </thead>
             <tbody>
-                {% for key, value in dict_data.items %}
-                
-                    <tr>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;">{{ value.cmc_rank }}</a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;">{{ key }} </a><div class="text-secondary">{{ value.symbol }}</div></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;">$ {{ value.quote.USD.price }}</a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;"> {{ value.quote.USD.percent_change_24h }}% </a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;"> {{ value.quote.USD.percent_change_7d }}% </a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;">$ {{ value.quote.USD.market_cap }}</a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;">$ {{ value.quote.USD.volume_24h }} </a></td>
-                    <td><a href="{% url 'price_detail' value.slug %}" style="color:black;"> {{ value.circulating_supply }}</a></td>
-                    </tr>
+              {% if data %}
+                {% for obj in data %}
+                  <tr>
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.market_cap_rank }}</a></td>
+                    <td><img src={{obj.image}} height="35"> <a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.name }}</a> <a href="{% url 'price_detail' obj.id %}" style="color:rgb(63, 61, 61);">{{ obj.symbol }}</a></td>
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.current_price }}</a></td>
+                    {% if obj.price_change_percentage_24h >= 0 %}
+                      <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:rgb(0, 161, 0);"><span class="material-icons"  style="vertical-align: middle;">arrow_drop_up</span>{{ obj.price_change_percentage_24h }}</a></td>
+                    {% else %}
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:red;"><span class="material-icons"  style="vertical-align: middle;">arrow_drop_down</span>{{ obj.price_change_percentage_24h }}</a></td>
+                    {% endif %}
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.market_cap }}</a></td>
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.total_volume }}</a></td>
+                    <td class="align-middle"><a href="{% url 'price_detail' obj.id %}" style="color:black;">{{ obj.circulating_supply }}</a></td>
+
+                    
+                  </tr>
                 {% endfor %}
+              {% else %}
+                <h3>Notting here...</h3>
+              {% endif %}
             </tbody>
         </table>
+
+      </br>
+      <p style='text-align:center;'>
+        <a href="{% url 'prices_list' page=page|add:'-1' %}" style="color:black;"><span class="material-icons">arrow_back_ios</span></a>
+        <a href="{% url 'prices_list' page=page|add:'1' %}" style="color:black;"><span class="material-icons">arrow_forward_ios</span></a>
+      </p>
       </div>
     </main>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

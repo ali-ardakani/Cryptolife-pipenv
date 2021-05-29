@@ -15,6 +15,7 @@ requests = "*"
 pillow = "*"
 django-easy-select2 = "*"
 opencv-python = "*"
+googlenews = "*"
 
 [dev-packages]
 

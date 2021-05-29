@@ -16,9 +16,11 @@ from .views import (
     UnLikeView,
     CommentLikeView,
     CommentUnLikeView,
+    # google_news,
     )
 
 urlpatterns = [
+    # path('update/', google_news, name='update_news'),
     path('<int:pk>/unlike-comment/', CommentUnLikeView, name='unlike_comment'),
     path('<int:pk>/like-comment/', CommentLikeView, name='like_comment'),
     path('<int:pk>/unlike-news/', UnLikeView, name='unlike_news'),

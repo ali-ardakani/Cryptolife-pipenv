@@ -18,7 +18,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="{% url 'prices_list' %}">Prices <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="{% url 'prices_list' page=1 %}">Prices <span class="sr-only">(current)</span></a>
           </li>
           {% if perms.news.add_news or perms.news.all %}
           <li class="nav-item dropdown active">
@@ -59,6 +59,8 @@
       </div>
     </nav>
     <main>
+      {% block price_detail %}
+      {% endblock price_detail %}
       <div class='tableWrapper___3utdq cmc-table-homepage-wrapper___22rL4'>
         {% block prices %}
         {% endblock prices %}
