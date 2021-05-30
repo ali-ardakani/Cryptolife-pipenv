@@ -5,7 +5,7 @@ from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
-from django.core import serializers
+from datetime import datetime , timedelta
 import re
 from accounts.models import CustomUser
 import requests
@@ -88,23 +88,58 @@ class NewsListView(ListView):
             googlenews = GoogleNews()
             googlenews = GoogleNews(lang='en')
             googlenews = GoogleNews(period='1d')
-            googlenews.get_news(name)
+            googlenews.get_news(name+ ' ')
             googlenews = googlenews.results()[0:5]
-            news_obj = News.objects.all().values()
-            for news in news_obj:
-                news_dict = {}
-                news_dict['title'] = news['title']
-                news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
-                news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
-                news_dict['title'] = news['body']
 
-                googlenews.append(news_dict)
-
-            googlenews = sorted(googlenews, key = lambda i: i['datetime'], reverse=True)
             return googlenews
+
+        googlenews = google_news('cryptocurrency') + google_news('bitcoin')
+        for news in googlenews:
+            if news['datetime'] == None:
+
+                if 'minutes' in news['date']:
+                    minutes = int(float(re.sub(r"\s.*", '', news['date'])))
+                    news['datetime'] = datetime.now() - timedelta(minutes=minutes)
+                
+                if 'seconds' in news['date']:
+                    seconds = int(float(re.sub(r"\s.*", '', news['date'])))
+                    news['datetime'] = datetime.now() - timedelta(seconds=seconds)
+
+        news_obj = News.objects.all().values()
+        for news in news_obj:
+            news_dict = {}
+            news_dict['pk'] = news['id']
+            news_dict['title'] = news['title']
+            news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
+            news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
+            news_dict['desc'] = news['body']
+            news_dict['img'] = news['header_image']
+            date = datetime.now() - news_dict['datetime']
+            hours, remainder = divmod(date.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            if hours != 0:
+                news_dict['date'] = str(int(hours)) + ' ' + 'hours ago'
+            elif minutes != 0:
+                news_dict['date'] = str(int(minutes)) + ' ' + 'minutes ago'
+            else:
+                news_dict['date'] = str(int(seconds)) + ' ' + 'seconds ago'
+
+            googlenews.append(news_dict)
+
+        result = []
+        result_title_list = []
+        for news in googlenews:
+            news_title = list(news.values())[0]
+            if news_title not in result_title_list:
+                if 'pk' in news.keys():
+                    result.append(news)
+                else:
+                    result_title_list.append(news_title)
+                    result.append(news)
+
+        result = sorted(result, key = lambda i: i['datetime'], reverse=True)
         
-        context['news_bitcoin'] = google_news('bitcoin')
-        context['news_cryptocurrency'] = google_news('cryptocurrency')
+        context['news_cryptocurrency'] = result
 
         return context
 
@@ -155,6 +190,7 @@ class NewsDetailView(DetailView):
             context["total_unlikes_comment"] = total_unlikes_comment
             context["liked_comment"] = liked_comment
             context["unliked_comment"] = unliked_comment
+
         return context
 
 
@@ -429,6 +465,57 @@ def get_coin_by_id(request,id, **kwargs):
         context['companies'] = companies            
 
         context['data'] = data
+        if data['market_data']['market_cap_rank'] <= 15:
+            googlenews = GoogleNews()
+            googlenews = GoogleNews(lang='en')
+            googlenews = GoogleNews(period='1d')
+            googlenews.get_news(data['name'])
+            googlenews = googlenews.results()[:10]
+        else:
+            googlenews = GoogleNews()
+            googlenews = GoogleNews(lang='en')
+            googlenews = GoogleNews(period='1d')
+            googlenews.get_news(data['name'] + ' ' + 'crypto')
+            googlenews = googlenews.results()[:10]
+        
+        for news in googlenews:
+            if 'minutes' in news['date']:
+                    minutes = int(float(re.sub(r"\s.*", '', news['date'])))
+                    news['datetime'] = datetime.now() - timedelta(minutes=minutes)
+                
+            if 'seconds' in news['date']:
+                seconds = int(float(re.sub(r"\s.*", '', news['date'])))
+                news['datetime'] = datetime.now() - timedelta(seconds=seconds)
+
+
+        category = Category.objects.get(slug=data['name'].lower())
+        news_obj = News.objects.filter(category=category).values()
+        for news in news_obj:
+            news_dict = {}
+            news_dict['pk'] = news['id']
+            news_dict['title'] = news['title']
+            news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
+            news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
+            news_dict['desc'] = news['body']
+            news_dict['category'] = data['name'].lower()
+            news_dict['img'] = news['header_image']
+            date = datetime.now() - news_dict['datetime']
+            hours, remainder = divmod(date.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            if hours != 0:
+                news_dict['date'] = str(int(hours)) + ' ' + 'hours ago'
+            elif minutes != 0:
+                news_dict['date'] = str(int(minutes)) + ' ' + 'minutes ago'
+            else:
+                news_dict['date'] = str(int(seconds)) + ' ' + 'seconds ago'
+
+            googlenews.append(news_dict)
+
+        googlenews = sorted(googlenews, key = lambda i: i['datetime'], reverse=True)
+
+        context['googlenews'] = googlenews
+
+        
 
         return render(request, 'price/price_detail.html', context)
 

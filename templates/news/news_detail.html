@@ -44,8 +44,10 @@
     </div>
     <br/>
     <p>
-        {% for category in object.category.all %}
-        <a href="{% url 'category' slug=category|slugify %}"><button type="button" class="btn btn-secondary">{{ category }}</button></a>
+        {% for category in object.category.all.values %}
+            {% if category.slug != 'cryptocurrency'  %}
+                <a href="{% url 'price_detail' category.slug %}"><button type="button" class="btn btn-secondary">{{category.slug}}</button></a>
+            {% endif %}
         {% endfor %}
         </p>
         <br/>

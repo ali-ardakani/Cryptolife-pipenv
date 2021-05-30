@@ -10,6 +10,7 @@ class NewsAdmin(admin.ModelAdmin):
     inlines = [
         CommentInline,
     ]
+    readonly_fields = ["datetime",]
     form = select2_modelform(News, attrs={'width': '250px'})
 
 class CategoryAdmin(admin.ModelAdmin):
