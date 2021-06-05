@@ -12,6 +12,7 @@ import requests
 from GoogleNews import GoogleNews
 from .models import Comment, News, Category
 from .forms import NewsForm, CommentForm
+from idea.models import Idea
 
 
 def LikeView(request, pk):
@@ -514,6 +515,24 @@ def get_coin_by_id(request,id, **kwargs):
         googlenews = sorted(googlenews, key = lambda i: i['datetime'], reverse=True)
 
         context['googlenews'] = googlenews
+
+
+        idea_obj = Idea.objects.filter(category=category).values()
+        for idea in idea_obj:
+            idea['datetime'] = idea['datetime'].replace(tzinfo=None)
+            date = datetime.now() - idea['datetime']
+            hours, remainder = divmod(date.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            if hours != 0:
+                idea['date'] = str(int(hours)) + ' ' + 'hours ago'
+            elif minutes != 0:
+                idea['date'] = str(int(minutes)) + ' ' + 'minutes ago'
+            else:
+                idea['date'] = str(int(seconds)) + ' ' + 'seconds ago'
+
+            idea['author'] = str(CustomUser.objects.get(id = idea['author_id']))
+
+        context['ideas'] = idea_obj
 
         
 

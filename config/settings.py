@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'accounts',
     'pages',
     'news',
+    'idea',
     'ckeditor',
     'ckeditor_uploader',
     'easy_select2',

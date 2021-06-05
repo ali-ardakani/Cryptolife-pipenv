@@ -37,11 +37,13 @@
           </li>
           {% endif %}
           <li class="nav-item active">
-            <a class="nav-link" href="#">Ideas<span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="{% url 'idea:idea_list' %}">Ideas<span class="sr-only">(current)</span></a>
           </li>
         </ul>
       </div>
         {% if user.is_authenticated %}
+          {% block nav_idea %}
+          {% endblock nav_idea %}
           <div class = "btn-group dropleft">
             <img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{ user.profile_image.url }}" alt="logo" width="40" height="40">
             <div class="dropdown-menu" aria-labelledby="id_profile_links">
@@ -59,6 +61,8 @@
       </div>
     </nav>
     <main>
+      {% block idea %}
+      {% endblock idea %}
       {% block price_detail %}
       {% endblock price_detail %}
       <div class='tableWrapper___3utdq cmc-table-homepage-wrapper___22rL4'>

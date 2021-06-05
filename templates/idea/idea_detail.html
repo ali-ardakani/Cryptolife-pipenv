@@ -6,27 +6,27 @@
     <div class="news-entry">
         <h2>{{ object.title }}</h2>
         <p class="font-weight-bold">by {{ object.author }}  <span class="text-muted font-weight-normal">{{ object.datetime }}</span>
-            {% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %}
-            <a href="{% url 'news_edit' news.pk %}">Edit</a> |
-            <a href="{% url 'news_delete' news.pk %}">Delete</a>
+            {% if user == idea.author or perms.idea.all or perms.idea.change_idea or perms.idea.delete_idea %}
+            <a href="{% url 'idea:idea_edit' idea.pk %}">Edit</a> |
+            <a href="{% url 'idea:idea_delete' idea.pk %}">Delete</a>
         {% endif %}
         {% if user.is_authenticated %}
             <div style='display:flex;'>
-                <form action="{% url 'like_news' news.pk %}" method="POST">
+                <form action="{% url 'idea:like_idea' idea.pk %}" method="POST">
                     {% csrf_token %}
-                    {% if user in object.like_news.all %}
-                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_up</span> {{ total_likes }}</button>
+                    {% if user in object.like_idea.all %}
+                    <button type="submit" name="idea_id" value="{{ idea.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_up</span> {{ total_likes }}</button>
                     {% else %}
-                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn"><span class="material-icons">thumb_up</span> {{ total_likes }}</button>
+                    <button type="submit" name="idea_id" value="{{ idea.id }}" class="btn"><span class="material-icons">thumb_up</span> {{ total_likes }}</button>
                     {% endif %}
                 </form>
 
-                <form action="{% url 'unlike_news' news.pk %}" method="POST">
+                <form action="{% url 'idea:unlike_idea' idea.pk %}" method="POST">
                     {% csrf_token %}
-                    {% if user in object.unlike_news.all %}
-                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_down</span> {{ total_unlikes }}</button> 
+                    {% if user in object.unlike_idea.all %}
+                    <button type="submit" name="idea_id" value="{{ idea.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_down</span> {{ total_unlikes }}</button> 
                     {% else %}
-                    <button type="submit" name="news_id" value="{{ news.id }}" class="btn"><span class="material-icons">thumb_down</span> {{ total_unlikes }}</button>
+                    <button type="submit" name="idea_id" value="{{ idea.id }}" class="btn"><span class="material-icons">thumb_down</span> {{ total_unlikes }}</button>
                     {% endif %}
                 </form>
             </div>
@@ -56,14 +56,14 @@
         <br/>
     <div class="col-md-8 card mb-4 mt-3">
         {% if user.is_authenticated %}
-        <a href='{% url "comment_new" pk_news=news.pk %}'>Add comment ...</a>
+        <a href='{% url "idea:comment_new" idea.pk%}'>Add comment ...</a>
         {% else %}
         <p><a href="{% url 'accounts:login' %}" class="">Log in</a> to add comment</p>
         {% endif %}
         <div class="card-body">
             <h2>{{ object.comments.count }} comments</h2>
             <hr>
-            {% for comment in object.comments.all %}
+            {% for comment in object.comments_idea.all %}
             <div class="comments" style="padding: 10;">
                 <p class="font-weight-bold">
                     {{ comment.author }}
@@ -71,25 +71,25 @@
                         {{ comment.created_on }}
                     </span>
                     {% if user == news.author or user == comment.author or perms.news.all or perms.news.change_news or perms.news.delete_news %} 
-                        <a href="{% url 'comment_edit'  pk_news=news.pk pk=comment.pk %}">Edit</a> |
-                        <a href="{% url 'comment_delete'  pk_news=news.pk pk=comment.pk %}">Delete</a>
+                        <a href="{% url 'idea:comment_edit' pk_idea=idea.pk pk=comment.pk %}">Edit</a> |
+                        <a href="{% url 'idea:comment_delete' pk_idea=idea.pk pk=comment.pk %}">Delete</a>
                     {% endif %} 
                 </p>
-                {{ comment.comment|safe|linebreaks }}
+                {{ comment.comment_idea|safe|linebreaks }}
                 {% if user.is_authenticated %}
                 <div style='display:flex;'>
-                    <form action="{% url 'like_comment' news.pk %}" method="POST">
+                    <form action="{% url 'idea:like_comment' idea.pk %}" method="POST">
                         {% csrf_token %}
-                        {% if user in comment.like_comment.all %}
+                        {% if user in comment.like_comment_idea.all %}
                         <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_up</span> {{ comment.total_likes_comment }}</button>
                         {% else %}
                         <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn"><span class="material-icons">thumb_up</span> {{ comment.total_likes_comment }}</button>
                         {% endif %}
                     </form>
 
-                    <form action="{% url 'unlike_comment' news.pk %}" method="POST">
+                    <form action="{% url 'idea:unlike_comment' idea.pk %}" method="POST">
                         {% csrf_token %}
-                        {% if user in comment.unlike_comment.all %}
+                        {% if user in comment.unlike_comment_idea.all %}
                         <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn"><span class="material-icons" style="color:blue;">thumb_down</span> {{ comment.total_unlikes_comment }}</button> 
                         {% else %}
                         <button type="submit" name="comment_id" value="{{ comment.id }}" class="btn"><span class="material-icons">thumb_down</span> {{ comment.total_unlikes_comment }}</button> 

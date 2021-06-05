@@ -23,6 +23,7 @@ from  django.views.decorators.cache  import never_cache
 from ckeditor_uploader import views
 
 urlpatterns = [
+    path('idea/', include('idea.urls', namespace='idea')),
     path('ckeditor/upload/', login_required(views.upload), name='ckeditor_upload'),
     path('ckeditor/browse/', never_cache(login_required(views.browse)), name='ckeditor_browse'),
     path('admin/', admin.site.urls),

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Idea{% endblock title %}
+
+{% block nav_idea %}
+<form class="form-inline ml-auto" style="margin-right: 1%;">
+    <a href="{% url 'idea:idea_new' %}" class="btn btn-outline-secondary">Add Idea</a>
+</form>
+{% endblock nav_idea %}
+
+{% block content %}
+</br>
+    {% for idea in ideas%}
+        <div class="card mb-3">
+            <div class="row no-gutters">
+                <div class="col-md-3">
+                    <img src="/media/{{idea.header_image}}" class="card-img">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title"><a href="{% url 'idea:idea_detail' idea.id %}" style="color:#1d1414;">{{ idea.title }}</a>{% if user == idea.author or perms.idea.all or perms.idea.change_idea or perms.idea.delete_idea %} <a href="{% url 'idea:idea_edit' idea.id %}" style="font-size: 15px;">(Edit | </a><a href="{% url 'idea:idea_delete' idea.id %}" style="font-size: 15px;">Delete)</a> {% endif %}</h5>
+                        <span class="text-muted">by {{ idea.author }} | {{ idea.datetime }}</span>
+                        <p class="card-text">{{ idea.body|safe|truncatewords:"200" }}</p>
+                        <p class="card-text"><small class="text-muted">{{idea.date}}</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock content %}
