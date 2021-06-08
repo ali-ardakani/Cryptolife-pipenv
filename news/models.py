@@ -19,6 +19,11 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse("news_new")
 
+
+def get_header_image_filepath(self, filepath):
+    return f'images/news/header/{self.author.id}/{self.header_image}'
+
+
 class News(models.Model):
 
     class Meta:
@@ -28,7 +33,7 @@ class News(models.Model):
         ordering = ['-datetime']
 
     title = models.CharField(max_length=255)
-    header_image = models.ImageField(null=True, blank=True, upload_to="images/news/header/")
+    header_image = models.ImageField(null=True, blank=True, upload_to=get_header_image_filepath)
     body = RichTextUploadingField()
     datetime = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(

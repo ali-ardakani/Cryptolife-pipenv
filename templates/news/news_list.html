@@ -16,7 +16,17 @@
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
-                            <h5 class="card-title"><a href="{% url 'news_detail' news.pk %}" style="color:#1d1414;">{{ news.title }}</a>{% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %} <a href="{% url 'news_edit' news.pk %}" style="font-size: 15px;">(Edit | </a><a href="{% url 'news_delete' news.pk %}" style="font-size: 15px;">Delete)</a> {% endif %}</h5>
+                            <h5 class="card-title">
+                                <a href="{% url 'news_detail' news.pk %}" style="color:#1d1414;">
+                                    {{ news.title }}
+                                </a>
+                                
+                                {% if user.is_authenticated and user.id == news.author.id or perms.news.all or perms.news.change_news or perms.news.delete_news %} 
+                                <l style="font-size: 15px;">
+                                    (<a href="{% url 'news_edit' news.pk %}">Edit</a> | <a href="{% url 'news_delete' news.pk %}">Delete</a>)
+                                </l>
+                                {% endif %}
+                            </h5>
                             <span class="text-muted">by {{ news.site }} | {{ news.datetime }}</span>
                             <p class="card-text">{{ news.desc|safe|truncatewords:"200" }}</p>
                             <p class="card-text"><small class="text-muted">{{news.date}}</small></p>

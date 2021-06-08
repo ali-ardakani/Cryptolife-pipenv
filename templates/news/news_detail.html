@@ -5,11 +5,12 @@
 {% block content %}
     <div class="news-entry">
         <h2>{{ object.title }}</h2>
-        <p class="font-weight-bold">by {{ object.author }}  <span class="text-muted font-weight-normal">{{ object.datetime }}</span>
-            {% if user == news.author or perms.news.all or perms.news.change_news or perms.news.delete_news %}
-            <a href="{% url 'news_edit' news.pk %}">Edit</a> |
-            <a href="{% url 'news_delete' news.pk %}">Delete</a>
-        {% endif %}
+        <p class="font-weight"><strong>by {{ object.author }} </strong> <span class="text-muted font-weight-normal">{{ object.datetime }}</span>
+            {% if user.is_authenticated and user.id == news.author.id or perms.news.all or perms.news.change_news or perms.news.delete_news %} 
+                <l style="font-size: 15px;">
+                    (<a href="{% url 'news_edit' news.pk %}">Edit</a> | <a href="{% url 'news_delete' news.pk %}">Delete</a>)
+                </l>
+            {% endif %}
         {% if user.is_authenticated %}
             <div style='display:flex;'>
                 <form action="{% url 'like_news' news.pk %}" method="POST">
@@ -65,15 +66,20 @@
             <hr>
             {% for comment in object.comments.all %}
             <div class="comments" style="padding: 10;">
-                <p class="font-weight-bold">
-                    {{ comment.author }}
+                <p class="font-weight">
+                    <strong>{{ comment.author }}</strong>
                     <span class="text-muted font-weight-normal">
                         {{ comment.created_on }}
                     </span>
-                    {% if user == news.author or user == comment.author or perms.news.all or perms.news.change_news or perms.news.delete_news %} 
-                        <a href="{% url 'comment_edit'  pk_news=news.pk pk=comment.pk %}">Edit</a> |
-                        <a href="{% url 'comment_delete'  pk_news=news.pk pk=comment.pk %}">Delete</a>
-                    {% endif %} 
+                    {% if user.is_authenticated and user.id == comment.author.id %} 
+                        <l style="font-size: 15px;">
+                            (<a href="{% url 'comment_edit'  pk_news=news.pk pk=comment.pk %}">Edit</a> | <a href="{% url 'comment_delete'  pk_news=news.pk pk=comment.pk %}">Delete</a>)
+                        </l>
+                    {% elif perms.news.all or perms.news.change_news or perms.news.delete_news %}
+                        <l style="font-size: 15px;">
+                            (<a href="{% url 'comment_delete'  pk_news=news.pk pk=comment.pk %}">Delete</a>)
+                        </l>
+                    {% endif %}
                 </p>
                 {{ comment.comment|safe|linebreaks }}
                 {% if user.is_authenticated %}

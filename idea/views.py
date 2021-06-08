@@ -30,7 +30,7 @@ class IdeaListView(ListView):
             else:
                 idea['date'] = str(int(seconds)) + ' ' + 'seconds ago'
 
-            idea['author'] = str(CustomUser.objects.get(id = idea['author_id']))
+            idea['author'] = CustomUser.objects.get(id = idea['author_id'])
 
         context['ideas'] = idea_obj
             
@@ -156,7 +156,7 @@ class IdeaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         obj = self.get_object()
-        if self.request.user.has_perm('idea.all') or obj.author == self.request.user:
+        if obj.author == self.request.user:
             return True 
 
 
@@ -173,7 +173,7 @@ class IdeaCommentsUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
     def test_func(self):
         obj = self.get_object()
-        if self.request.user.has_perm('idea.all') or self.request.user.has_perm('idea.delete_idea') or obj.author == self.request.user:
+        if obj.author == self.request.user:
             return True 
 
 
@@ -185,7 +185,7 @@ class IdeaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         obj = self.get_object()
-        if self.request.user.has_perm('idea.all') or self.request.user.has_perm('idea.delete_idea') or obj.author == self.request.user:
+        if self.request.user.has_perm('idea:idea.all') or self.request.user.has_perm('idea.delete_idea') or obj.author.id == self.request.user.id:
             return True 
 
 
@@ -208,11 +208,10 @@ class IdeaCommentsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView
 
 
 
-class IdeaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class IdeaCreateView(LoginRequiredMixin, CreateView):
     model = Idea
     form_class = IdeaForm
     template_name = 'idea/idea_new.html'
-    permission_required = 'idea.add_idea'
 
     def form_valid(self, form):
         form.instance.author = self.request.user

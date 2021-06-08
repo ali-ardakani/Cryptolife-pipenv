@@ -18,7 +18,22 @@
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'idea:idea_detail' idea.id %}" style="color:#1d1414;">{{ idea.title }}</a>{% if user == idea.author or perms.idea.all or perms.idea.change_idea or perms.idea.delete_idea %} <a href="{% url 'idea:idea_edit' idea.id %}" style="font-size: 15px;">(Edit | </a><a href="{% url 'idea:idea_delete' idea.id %}" style="font-size: 15px;">Delete)</a> {% endif %}</h5>
+                        <h5 class="card-title">
+                                <a href="{% url 'idea:idea_detail' idea.id %}" style="color:#1d1414;">
+                                    {{ idea.title }}
+                                </a>
+                            
+                            {% if user.is_authenticated and user.id == idea.author.id %} 
+                                <l style="font-size: 15px;">
+                                    (<a href="{% url 'idea:idea_edit' idea.id %}">Edit</a> | <a href="{% url 'idea:idea_delete' idea.id %}">Delete</a>)
+                                </l>
+                            {% elif perms.idea.all or perms.idea.change_idea or perms.idea.delete_idea %}
+                                <l style="font-size: 15px;">
+                                    (<a href="{% url 'idea:idea_delete' idea.id %}">Delete</a>)
+                                </l>
+                            {% endif %}
+                        </h5>
+                        
                         <span class="text-muted">by {{ idea.author }} | {{ idea.datetime }}</span>
                         <p class="card-text">{{ idea.body|safe|truncatewords:"200" }}</p>
                         <p class="card-text"><small class="text-muted">{{idea.date}}</small></p>

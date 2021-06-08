@@ -28,7 +28,7 @@ urlpatterns = [
     path('new/', IdeaCreateView.as_view(), name='idea_new'),
     path('<int:pk>/edit/', IdeaUpdateView.as_view(), name='idea_edit'),
     path('<int:pk>/', IdeaDetailView.as_view(), name='idea_detail'),
-    path('<int:pk>/delete', IdeaDeleteView.as_view(), name='idea_delete'),
+    path('<int:pk>/delete/', IdeaDeleteView.as_view(), name='idea_delete'),
     path('', IdeaListView.as_view(), name='idea_list')
 ] 
 

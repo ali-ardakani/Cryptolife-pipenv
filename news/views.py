@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from datetime import datetime , timedelta
+import os
 import re
 from accounts.models import CustomUser
 import requests
@@ -86,12 +87,19 @@ class NewsListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(NewsListView, self).get_context_data(**kwargs)
         def google_news(name):
-            googlenews = GoogleNews()
-            googlenews = GoogleNews(lang='en')
-            googlenews = GoogleNews(period='1d')
-            googlenews.get_news(name+ ' ')
-            googlenews = googlenews.results()[0:5]
-
+            count = 0
+            while count <=3:
+                try:
+                    googlenews = GoogleNews()
+                    googlenews = GoogleNews(lang='en')
+                    googlenews = GoogleNews(period='1d')
+                    googlenews.get_news(name+ ' ')
+                    googlenews = googlenews.results()[0:5]
+                    if len(googlenews) != 0:  
+                        break
+                    count +=1
+                except:
+                    pass
             return googlenews
 
         googlenews = google_news('cryptocurrency') + google_news('bitcoin')
@@ -223,7 +231,7 @@ class NewsCommentsUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
     def test_func(self):
         obj = self.get_object()
-        if self.request.user.has_perm('news.all') or self.request.user.has_perm('news.delete_news') or obj.author == self.request.user:
+        if obj.author == self.request.user:
             return True 
 
 
@@ -233,10 +241,21 @@ class NewsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     template_name = 'news/news_delete.html'
     success_url = reverse_lazy('news_list')
 
+    def delete_header_image(self, pk):
+        print(pk)
+        news = get_object_or_404(News, id = pk)
+        header_image = news.header_image
+        if header_image is not None:
+            os.remove(str(header_image))
+            return HttpResponseRedirect(reverse('news_list'))
+        else:
+            return HttpResponseRedirect(reverse('news_list'))
+
     def test_func(self):
         obj = self.get_object()
         if self.request.user.has_perm('news.all') or self.request.user.has_perm('news.delete_news') or obj.author == self.request.user:
             return True 
+    
 
 
 class NewsCommentsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
