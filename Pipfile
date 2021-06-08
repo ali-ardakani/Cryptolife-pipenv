@@ -16,6 +16,8 @@ pillow = "*"
 django-easy-select2 = "*"
 opencv-python = "*"
 googlenews = "*"
+psycopg2-binary = "*"
+gunicorn = "*"
 
 [dev-packages]
 
