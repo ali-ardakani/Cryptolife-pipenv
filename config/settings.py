@@ -32,8 +32,9 @@ DEBUG = env.bool('DEBUG', default=False)
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+
 ALLOWED_HOSTS = ['clcoin.herokuapp.com', 'localhost', '127.0.0.1']
-SECURE_SSL_REDIRECT = True
+
 
 
 # Application definition

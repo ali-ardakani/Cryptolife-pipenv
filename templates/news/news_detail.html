@@ -67,7 +67,7 @@
             {% for comment in object.comments.all %}
             <div class="comments" style="padding: 10;">
                 <p class="font-weight">
-                    <strong>{{ comment.author }}</strong>
+                    <strong>by {{ comment.author }}</strong>
                     <span class="text-muted font-weight-normal">
                         {{ comment.created_on }}
                     </span>

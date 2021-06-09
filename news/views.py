@@ -507,53 +507,52 @@ def get_coin_by_id(request,id, **kwargs):
                 seconds = int(float(re.sub(r"\s.*", '', news['date'])))
                 news['datetime'] = datetime.now() - timedelta(seconds=seconds)
 
+        try:
+            category = Category.objects.get(slug=data['name'].lower())
+            news_obj = News.objects.filter(category=category).values()
+            for news in news_obj:
+                news_dict = {}
+                news_dict['pk'] = news['id']
+                news_dict['title'] = news['title']
+                news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
+                news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
+                news_dict['desc'] = news['body']
+                news_dict['category'] = data['name'].lower()
+                news_dict['img'] = news['header_image']
+                date = datetime.now() - news_dict['datetime']
+                hours, remainder = divmod(date.total_seconds(), 3600)
+                minutes, seconds = divmod(remainder, 60)
+                if hours != 0:
+                    news_dict['date'] = str(int(hours)) + ' ' + 'hours ago'
+                elif minutes != 0:
+                    news_dict['date'] = str(int(minutes)) + ' ' + 'minutes ago'
+                else:
+                    news_dict['date'] = str(int(seconds)) + ' ' + 'seconds ago'
 
-        category = Category.objects.get(slug=data['name'].lower())
-        news_obj = News.objects.filter(category=category).values()
-        for news in news_obj:
-            news_dict = {}
-            news_dict['pk'] = news['id']
-            news_dict['title'] = news['title']
-            news_dict['site'] = str(CustomUser.objects.get(id = news['author_id']))
-            news_dict['datetime'] = news['datetime'].replace(tzinfo=None)
-            news_dict['desc'] = news['body']
-            news_dict['category'] = data['name'].lower()
-            news_dict['img'] = news['header_image']
-            date = datetime.now() - news_dict['datetime']
-            hours, remainder = divmod(date.total_seconds(), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            if hours != 0:
-                news_dict['date'] = str(int(hours)) + ' ' + 'hours ago'
-            elif minutes != 0:
-                news_dict['date'] = str(int(minutes)) + ' ' + 'minutes ago'
-            else:
-                news_dict['date'] = str(int(seconds)) + ' ' + 'seconds ago'
+                googlenews.append(news_dict)
 
-            googlenews.append(news_dict)
+            idea_obj = Idea.objects.filter(category=category).values()
+            for idea in idea_obj:
+                idea['datetime'] = idea['datetime'].replace(tzinfo=None)
+                date = datetime.now() - idea['datetime']
+                hours, remainder = divmod(date.total_seconds(), 3600)
+                minutes, seconds = divmod(remainder, 60)
+                if hours != 0:
+                    idea['date'] = str(int(hours)) + ' ' + 'hours ago'
+                elif minutes != 0:
+                    idea['date'] = str(int(minutes)) + ' ' + 'minutes ago'
+                else:
+                    idea['date'] = str(int(seconds)) + ' ' + 'seconds ago'
+
+                idea['author'] = str(CustomUser.objects.get(id = idea['author_id']))
+
+            context['ideas'] = idea_obj
+        except:
+            pass
 
         googlenews = sorted(googlenews, key = lambda i: i['datetime'], reverse=True)
 
         context['googlenews'] = googlenews
-
-
-        idea_obj = Idea.objects.filter(category=category).values()
-        for idea in idea_obj:
-            idea['datetime'] = idea['datetime'].replace(tzinfo=None)
-            date = datetime.now() - idea['datetime']
-            hours, remainder = divmod(date.total_seconds(), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            if hours != 0:
-                idea['date'] = str(int(hours)) + ' ' + 'hours ago'
-            elif minutes != 0:
-                idea['date'] = str(int(minutes)) + ' ' + 'minutes ago'
-            else:
-                idea['date'] = str(int(seconds)) + ' ' + 'seconds ago'
-
-            idea['author'] = str(CustomUser.objects.get(id = idea['author_id']))
-
-        context['ideas'] = idea_obj
-
-        
 
         return render(request, 'price/price_detail.html', context)
 
